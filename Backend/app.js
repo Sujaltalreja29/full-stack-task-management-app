@@ -1,18 +1,34 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const { errorHandler, notFound } = require('./middleware/errorHandler');
 // const path = require('path');
-
+const authRoutes = require('./routes/auth');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
 
+const corsOptions = {
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+    optionsSuccessStatus: 200
+  };
+
 // use middlewares
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // MongoDB Connection
 const con = require('./db/connection');
 
+
+
+app.use(notFound);
+app.use(errorHandler);
+
+//Routes
+app.use('/api/auth', authRoutes);
 
 con.then(db => {
     if (!db) return process.exit(1);
