@@ -83,22 +83,22 @@ const updateMenuItem = async (req, res, next) => {
             throw new Error('Menu item not found');
         }
 
-        // Check if updating name and if new name already exists
-        if (req.body.name && req.body.name !== menuItem.name) {
-            const menuItemExists = await Menu.findOne({ name: req.body.name });
-            if (menuItemExists) {
-                res.status(400);
-                throw new Error('Menu item with this name already exists');
-            }
-        }
+        // // Check if updating name and if new name already exists
+        // if (req.body?.name && req.body?.name !== menuItem.name) {
+        //     const menuItemExists = await Menu.findOne({ name: req.body.name });
+        //     if (menuItemExists) {
+        //         res.status(400);
+        //         throw new Error('Menu item with this name already exists');
+        //     }
+        // }
 
         const updatedMenuItem = await Menu.findByIdAndUpdate(
             req.params.id,
             {
-                name: req.body.name || menuItem.name,
-                category: req.body.category || menuItem.category,
-                price: req.body.price || menuItem.price,
-                availability: req.body.availability !== undefined ? req.body.availability : menuItem.availability
+                name: req.body?.name || menuItem.name,
+                category: req.body?.category || menuItem.category,
+                price: req.body?.price || menuItem.price,
+                availability: req.body?.availability !== undefined ? req.body.availability : menuItem.availability
             },
             { new: true, runValidators: true }
         );
