@@ -31,6 +31,27 @@ const menuItemValidation = [
     .withMessage('Invalid category')
 ];
 
+const orderValidation = [
+  body('items')
+      .isArray()
+      .withMessage('Items must be an array')
+      .notEmpty()
+      .withMessage('Order must contain at least one item'),
+  
+  body('items.*.menuItem')
+      .isMongoId()
+      .withMessage('Invalid menu item ID'),
+  
+  body('items.*.quantity')
+      .isInt({ min: 1 })
+      .withMessage('Quantity must be at least 1'),
+
+  body('status')
+      .optional()
+      .isIn(['Pending', 'Confirmed', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled'])
+      .withMessage('Invalid status')
+];
+
 // Validation middleware
 const validate = (req, res, next) => {
   const errors = validationResult(req);
@@ -43,5 +64,6 @@ const validate = (req, res, next) => {
 module.exports = {
   registerValidation,
   menuItemValidation,
+  orderValidation,
   validate
 };

@@ -5,6 +5,7 @@ const { errorHandler, notFound } = require('./middleware/errorHandler');
 // const path = require('path');
 const authRoutes = require('./routes/auth');
 const menuRoutes = require('./routes/menu');
+const orderRoutes = require('./routes/order');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
 
@@ -26,6 +27,7 @@ const con = require('./db/connection');
 //Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/menu', menuRoutes);
+app.use('/api/order',orderRoutes);
 
 //Error handlers
 app.use(notFound);
