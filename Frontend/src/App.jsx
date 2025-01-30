@@ -1,15 +1,36 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import Login from './components/Auth/Login';
+import Register from './components/Auth/Register';
+import Menu from './pages/Menu';
 
 function App() {
 
   return (
-    <>
-      <h1 className='text-4xl font-bold'>Full stack task</h1>
-    </>
-  )
+    <Router>
+      <AuthProvider>
+        
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route
+            path="/menu"
+            element={
+              <ProtectedRoute>
+                <Menu />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/" element={<Navigate to="/menu" />} />
+            {/* Add other routes here */}
+          </Routes>
+        
+      </AuthProvider>
+      </Router>
+    );
 }
 
 export default App
