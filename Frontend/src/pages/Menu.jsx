@@ -1,26 +1,41 @@
-// src/pages/Menu.js
 import React, { useState, useEffect } from 'react';
 import * as menuService from '../services/menuService';
-import { PlusIcon, PencilIcon, TrashIcon } from 'lucide-react';
+import { PlusIcon, PencilIcon, TrashIcon, ShoppingCartIcon, MinusIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 
 const Menu = () => {
-  
+  const [userRole, setUserRole] = useState("user");
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const { 
+    items, 
+    addToCart, 
+    removeFromCart, 
+    getItemQuantity,
+    getCartTotal,
+    updateQuantity
+  } = useCart();
   const [formData, setFormData] = useState({
     name: '',
     category: 'Appetizers',
     price: '',
     availability: true
   });
+  const navigate = useNavigate();
+
+  const getTotalItems = () => {
+    return items.reduce((total, item) => total + item.quantity, 0);
+  };
 
   useEffect(() => {
     fetchMenuItems();
   }, []);
-
+  
   const fetchMenuItems = async () => {
     try {
       const data = await menuService.getAllMenuItems();
@@ -31,7 +46,7 @@ const Menu = () => {
       setLoading(false);
     }
   };
-
+  // Existing CRUD handlers remain the same
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -84,28 +99,41 @@ const Menu = () => {
     }
   };
 
-  if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
+   if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Menu Items</h1>
-        <button
-          onClick={() => {
-            setSelectedItem(null);
-            setFormData({
-              name: '',
-              category: 'Appetizers',
-              price: '',
-              availability: true
-            });
-            setIsModalOpen(true);
-          }}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
-        >
-          <PlusIcon className="w-4 h-4 mr-2" />
-          Add Item
-        </button>
+        <div className="flex gap-4">
+          {userRole === "user" && (
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center"
+            >
+              <ShoppingCartIcon className="w-4 h-4 mr-2" />
+              Cart ({getTotalItems()})
+            </button>
+          )}
+          {userRole === "admin" && (
+            <button
+              onClick={() => {
+                setSelectedItem(null);
+                setFormData({
+                  name: '',
+                  category: 'Appetizers',
+                  price: '',
+                  availability: true
+                });
+                setIsModalOpen(true);
+              }}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
+            >
+              <PlusIcon className="w-4 h-4 mr-2" />
+              Add Item
+            </button>
+          )}
+        </div>
       </div>
 
       {error && (
@@ -130,26 +158,58 @@ const Menu = () => {
                 }`}>
                   {item.availability ? 'Available' : 'Unavailable'}
                 </span>
+                
+                {userRole === "user" && item.availability && (
+                  <div className="mt-4 flex items-center gap-2">
+                    {getItemQuantity(item._id) > 0 ? (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => removeFromCart(item._id)}
+                          className="bg-red-500 hover:bg-red-700 text-white p-1 rounded"
+                        >
+                          <MinusIcon className="w-4 h-4" />
+                        </button>
+                        <span className="font-bold">{getItemQuantity(item._id)}</span>
+                        <button
+                          onClick={() => addToCart(item)}
+                          className="bg-green-500 hover:bg-green-700 text-white p-1 rounded"
+                        >
+                          <PlusIcon className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => addToCart(item)}
+                        className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
+                      >
+                        Add to Cart
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => handleEdit(item)}
-                  className="text-blue-500 hover:text-blue-700"
-                >
-                  <PencilIcon className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => handleDelete(item._id)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <TrashIcon className="w-5 h-5" />
-                </button>
-              </div>
+              {userRole === "admin" && (
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleEdit(item)}
+                    className="text-blue-500 hover:text-blue-700"
+                  >
+                    <PencilIcon className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item._id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <TrashIcon className="w-5 h-5" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ))}
       </div>
 
+      {/* Admin Modal - Existing code remains the same */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg p-8 max-w-md w-full">
@@ -225,6 +285,71 @@ const Menu = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Cart Modal */}
+      {isCartOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">Shopping Cart</h2>
+              <button
+                onClick={() => setIsCartOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ×
+              </button>
+            </div>
+            
+            {items.length === 0 ? (
+              <p className="text-gray-500 text-center py-4">Your cart is empty</p>
+            ) : (
+              <>
+                <div className="space-y-4 mb-4">
+                  {items.map(item => (
+                    <div key={item._id} className="flex justify-between items-center">
+                      <div>
+                        <h3 className="font-semibold">{item.name}</h3>
+                        <p className="text-sm text-gray-600">
+                          ${item.price.toFixed(2)} × {item.quantity}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => removeFromCart(item._id)}
+                          className="bg-red-500 hover:bg-red-700 text-white p-1 rounded"
+                        >
+                          <MinusIcon className="w-4 h-4" />
+                        </button>
+                        <span className="font-bold">{item.quantity}</span>
+                        <button
+                          onClick={() => addToCart(item)}
+                          className="bg-green-500 hover:bg-green-700 text-white p-1 rounded"
+                        >
+                          <PlusIcon className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t pt-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="font-bold">Total:</span>
+                    <span className="font-bold">${getCartTotal().toFixed(2)}</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      navigate('/order');
+                    }}
+                    className="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                  >
+                    Proceed to Checkout
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
