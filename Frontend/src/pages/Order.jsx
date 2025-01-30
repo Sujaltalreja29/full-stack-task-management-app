@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { TrashIcon, CreditCardIcon } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
-
+import * as orderService from '../services/orderService';
 const OrderPage = () => {
   const { 
     items, 
@@ -13,7 +13,7 @@ const OrderPage = () => {
   } = useCart();
   
   const navigate = useNavigate();
-
+  const updatedItems = items.map(item => ({ menuItem: item._id, quantity: item.quantity }));
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -51,13 +51,9 @@ const OrderPage = () => {
     setError('');
 
     try {
-      // Here you would typically make an API call to your backend
-      // const response = await orderService.createOrder({
-      //   items: items,
-      //   customerInfo: formData,
-      //   total: calculateTotal()
-      // });
-
+        console.log(updatedItems)
+      await orderService.createOrder({ items : updatedItems});
+      
       // Simulating API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
