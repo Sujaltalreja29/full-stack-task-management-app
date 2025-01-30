@@ -5,7 +5,6 @@ import { useAuth } from '../../context/AuthContext';
 import * as authService from '../../services/authService';
 
 
-console.log("login")
 
 const Login = () => {
   const [formData, setFormData] = useState({

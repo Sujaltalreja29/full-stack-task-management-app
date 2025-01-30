@@ -54,9 +54,6 @@ const OrderPage = () => {
         console.log(updatedItems)
       await orderService.createOrder({ items : updatedItems});
       
-      // Simulating API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
       setOrderPlaced(true);
       // Clear cart after successful order
       clearCart();
@@ -74,14 +71,9 @@ const OrderPage = () => {
           <div className="text-green-500 text-5xl mb-4">✓</div>
           <h2 className="text-2xl font-bold mb-4">Order Placed Successfully!</h2>
           <p className="text-gray-600 mb-4">
-            Thank you for your order. We'll send you an email confirmation shortly.
+            Redirectiong to history ...
           </p>
-          <button
-            onClick={() => navigate('/menu')}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Return to Menu
-          </button>
+          {setTimeout(() => navigate('/history'), 3000)}
         </div>
       </div>
     );

@@ -8,7 +8,7 @@ import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import Menu from './pages/Menu';
 import OrderPage from './pages/Order';
-
+import OrderHistory from './pages/History';
 function App() {
 
   return (
@@ -36,7 +36,15 @@ function App() {
             }
           />
           <Route path="/" element={<Navigate to="/order"/>} />
-            {/* Add other routes here */}
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute>
+                < OrderHistory/>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/" element={<Navigate to="/history"/>} />
           </Routes>
           </CartProvider>
       </AuthProvider>
