@@ -1,24 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import * as menuService from '../services/menuService';
-import { PlusIcon, PencilIcon, TrashIcon, ShoppingCartIcon, MinusIcon } from 'lucide-react';
+import { PlusIcon, PencilIcon, TrashIcon, ShoppingCartIcon, MinusIcon, SearchIcon, FilterIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 const Menu = () => {
   const [userRole, setUserRole] = useState(false);
   const [menuItems, setMenuItems] = useState([]);
+  const [filteredItems, setFilteredItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 });
   const { 
     items, 
     addToCart, 
     removeFromCart, 
     getItemQuantity,
     getCartTotal,
-    updateQuantity
   } = useCart();
   const [formData, setFormData] = useState({
     name: '',
@@ -27,7 +31,7 @@ const Menu = () => {
     availability: true
   });
   const navigate = useNavigate();
-
+  const CATEGORIES = ['Appetizers', 'Main Course', 'Desserts', 'Beverages'];
   const getTotalItems = () => {
     return items.reduce((total, item) => total + item.quantity, 0);
   };
@@ -42,12 +46,54 @@ const Menu = () => {
     try {
       const data = await menuService.getAllMenuItems();
       setMenuItems(data);
+      setFilteredItems(data);
     } catch (err) {
       setError('Failed to fetch menu items');
     } finally {
       setLoading(false);
     }
   };
+
+    // Search and Filter Function
+    const applyFilters = () => {
+      let result = menuItems;
+  
+      // Search filter
+      if (searchTerm) {
+        result = result.filter(item => 
+          item.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }
+  
+      // Category filter
+      if (selectedCategories.length > 0) {
+        result = result.filter(item => 
+          selectedCategories.includes(item.category)
+        );
+      }
+  
+      // Price range filter
+      result = result.filter(item => 
+        item.price >= priceRange.min && item.price <= priceRange.max
+      );
+  
+      setFilteredItems(result);
+    };
+  
+    // Apply filters whenever search or filter conditions change
+    useEffect(() => {
+      applyFilters();
+    }, [searchTerm, selectedCategories, priceRange, menuItems]);
+  
+    // Category toggle handler
+    const toggleCategory = (category) => {
+      setSelectedCategories(prev => 
+        prev.includes(category) 
+          ? prev.filter(c => c !== category)
+          : [...prev, category]
+      );
+    };
+  
   // Existing CRUD handlers remain the same
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -105,6 +151,71 @@ const Menu = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+       {/* Search and Filter Section */}
+       <div className="mb-6 flex items-center gap-4">
+        <div className="relative flex-grow">
+          <input
+            type="text"
+            placeholder="Search menu items..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+        </div>
+        
+        <button 
+          onClick={() => setIsFilterOpen(!isFilterOpen)}
+          className="bg-gray-200 hover:bg-gray-300 p-2 rounded-md"
+        >
+          <FilterIcon size={20} />
+        </button>
+      </div>
+
+      {/* Filter Dropdown */}
+      {isFilterOpen && (
+        <div className="bg-white border rounded-md p-4 mb-6 shadow-md">
+          <div className="mb-4">
+            <h3 className="font-bold mb-2">Categories</h3>
+            <div className="flex gap-2">
+              {CATEGORIES.map(category => (
+                <button
+                  key={category}
+                  onClick={() => toggleCategory(category)}
+                  className={`px-3 py-1 rounded-md ${
+                    selectedCategories.includes(category) 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-gray-200 text-gray-800'
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          <div>
+            <h3 className="font-bold mb-2">Price Range</h3>
+            <div className="flex items-center gap-4">
+              <input
+                type="number"
+                placeholder="Min Price"
+                value={priceRange.min}
+                onChange={(e) => setPriceRange(prev => ({ ...prev, min: Number(e.target.value) }))}
+                className="w-24 px-2 py-1 border rounded-md"
+              />
+              <span>to</span>
+              <input
+                type="number"
+                placeholder="Max Price"
+                value={priceRange.max}
+                onChange={(e) => setPriceRange(prev => ({ ...prev, max: Number(e.target.value) }))}
+                className="w-24 px-2 py-1 border rounded-md"
+              />
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Menu Items</h1>
         <div className="flex gap-4">
@@ -143,73 +254,79 @@ const Menu = () => {
           {error}
         </div>
       )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {menuItems.map((item) => (
-          <div
-            key={item._id}
-            className="bg-white rounded-lg shadow-md p-6 relative"
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-xl font-semibold">{item.name}</h3>
-                <p className="text-gray-600">{item.category}</p>
-                <p className="text-lg font-bold mt-2">${item.price.toFixed(2)}</p>
-                <span className={`inline-block px-2 py-1 rounded text-sm ${
-                  item.availability ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
-                  {item.availability ? 'Available' : 'Unavailable'}
-                </span>
-                
-                {!userRole && item.availability && (
-                  <div className="mt-4 flex items-center gap-2">
-                    {getItemQuantity(item._id) > 0 ? (
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => removeFromCart(item._id)}
-                          className="bg-red-500 hover:bg-red-700 text-white p-1 rounded"
-                        >
-                          <MinusIcon className="w-4 h-4" />
-                        </button>
-                        <span className="font-bold">{getItemQuantity(item._id)}</span>
-                        <button
-                          onClick={() => addToCart(item)}
-                          className="bg-green-500 hover:bg-green-700 text-white p-1 rounded"
-                        >
-                          <PlusIcon className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => addToCart(item)}
-                        className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
-                      >
-                        Add to Cart
-                      </button>
-                    )}
+{filteredItems.length === 0 ? (
+  <div className="text-center text-gray-500 py-4">
+    No items found matching your search and filters.
+  </div>
+) : (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {filteredItems.map((item) => (
+      <div
+        key={item._id}
+        className="bg-white rounded-lg shadow-md p-6 relative"
+      >
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="text-xl font-semibold">{item.name}</h3>
+            <p className="text-gray-600">{item.category}</p>
+            <p className="text-lg font-bold mt-2">${item.price.toFixed(2)}</p>
+            <span className={`inline-block px-2 py-1 rounded text-sm ${
+              item.availability ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            }`}>
+              {item.availability ? 'Available' : 'Unavailable'}
+            </span>
+            
+            {!userRole && item.availability && (
+              <div className="mt-4 flex items-center gap-2">
+                {getItemQuantity(item._id) > 0 ? (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => removeFromCart(item._id)}
+                      className="bg-red-500 hover:bg-red-700 text-white p-1 rounded"
+                    >
+                      <MinusIcon className="w-4 h-4" />
+                    </button>
+                    <span className="font-bold">{getItemQuantity(item._id)}</span>
+                    <button
+                      onClick={() => addToCart(item)}
+                      className="bg-green-500 hover:bg-green-700 text-white p-1 rounded"
+                    >
+                      <PlusIcon className="w-4 h-4" />
+                    </button>
                   </div>
+                ) : (
+                  <button
+                    onClick={() => addToCart(item)}
+                    className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
+                  >
+                    Add to Cart
+                  </button>
                 )}
               </div>
-              {userRole && (
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => handleEdit(item)}
-                    className="text-blue-500 hover:text-blue-700"
-                  >
-                    <PencilIcon className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item._id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <TrashIcon className="w-5 h-5" />
-                  </button>
-                </div>
-              )}
-            </div>
+            )}
           </div>
-        ))}
+          {userRole && (
+            <div className="flex space-x-2">
+              <button
+                onClick={() => handleEdit(item)}
+                className="text-blue-500 hover:text-blue-700"
+              >
+                <PencilIcon className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => handleDelete(item._id)}
+                className="text-red-500 hover:text-red-700"
+              >
+                <TrashIcon className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
+    ))}
+  </div>
+)}
+
 
       {/* Admin Modal - Existing code remains the same */}
       {isModalOpen && (
