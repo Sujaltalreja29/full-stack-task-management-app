@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 const Menu = () => {
-  const [userRole, setUserRole] = useState("user");
+  const [userRole, setUserRole] = useState(false);
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -33,6 +33,8 @@ const Menu = () => {
   };
 
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    setUserRole(user.usertype);
     fetchMenuItems();
   }, []);
   
@@ -106,7 +108,7 @@ const Menu = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Menu Items</h1>
         <div className="flex gap-4">
-          {userRole === "user" && (
+          {!userRole && (
             <button
               onClick={() => setIsCartOpen(true)}
               className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center"
@@ -115,7 +117,7 @@ const Menu = () => {
               Cart ({getTotalItems()})
             </button>
           )}
-          {userRole === "admin" && (
+          {userRole && (
             <button
               onClick={() => {
                 setSelectedItem(null);
@@ -159,7 +161,7 @@ const Menu = () => {
                   {item.availability ? 'Available' : 'Unavailable'}
                 </span>
                 
-                {userRole === "user" && item.availability && (
+                {!userRole && item.availability && (
                   <div className="mt-4 flex items-center gap-2">
                     {getItemQuantity(item._id) > 0 ? (
                       <div className="flex items-center gap-2">
@@ -188,7 +190,7 @@ const Menu = () => {
                   </div>
                 )}
               </div>
-              {userRole === "admin" && (
+              {userRole && (
                 <div className="flex space-x-2">
                   <button
                     onClick={() => handleEdit(item)}

@@ -1,14 +1,29 @@
-// src/context/CartContext.js
-import React, { createContext, useContext, useReducer } from 'react';
+import React, { createContext, useContext, useReducer, useEffect } from 'react';
 
 const CartContext = createContext();
 
-const initialState = {
-  items: [],
-  total: 0
+const CART_STORAGE_KEY = 'shopping-cart';
+
+// Load initial state from localStorage or use default
+const loadInitialState = () => {
+  try {
+    const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+    return savedCart ? JSON.parse(savedCart) : {
+      items: [],
+      total: 0
+    };
+  } catch (error) {
+    console.error('Error loading cart from localStorage:', error);
+    return {
+      items: [],
+      total: 0
+    };
+  }
 };
 
 const cartReducer = (state, action) => {
+  let newState;
+  
   switch (action.type) {
     case 'ADD_TO_CART':
       const existingItemIndex = state.items.findIndex(
@@ -21,68 +36,79 @@ const cartReducer = (state, action) => {
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
-        return {
+        newState = {
           ...state,
           items: updatedItems,
           total: calculateTotal(updatedItems)
         };
+      } else {
+        const newItems = [...state.items, { ...action.payload, quantity: 1 }];
+        newState = {
+          ...state,
+          items: newItems,
+          total: calculateTotal(newItems)
+        };
       }
-
-      const newItems = [...state.items, { ...action.payload, quantity: 1 }];
-      return {
-        ...state,
-        items: newItems,
-        total: calculateTotal(newItems)
-      };
+      break;
 
     case 'REMOVE_FROM_CART':
       const itemToRemove = state.items.find(item => item._id === action.payload);
       if (itemToRemove.quantity === 1) {
         const filteredItems = state.items.filter(item => item._id !== action.payload);
-        return {
+        newState = {
           ...state,
           items: filteredItems,
           total: calculateTotal(filteredItems)
         };
+      } else {
+        const updatedItems = state.items.map(item =>
+          item._id === action.payload
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
+        );
+        newState = {
+          ...state,
+          items: updatedItems,
+          total: calculateTotal(updatedItems)
+        };
       }
-
-      const updatedItems = state.items.map(item =>
-        item._id === action.payload
-          ? { ...item, quantity: item.quantity - 1 }
-          : item
-      );
-      return {
-        ...state,
-        items: updatedItems,
-        total: calculateTotal(updatedItems)
-      };
+      break;
 
     case 'UPDATE_QUANTITY':
       const { itemId, quantity } = action.payload;
       if (quantity < 1) {
         const filteredItems = state.items.filter(item => item._id !== itemId);
-        return {
+        newState = {
           ...state,
           items: filteredItems,
           total: calculateTotal(filteredItems)
         };
+      } else {
+        const itemsWithUpdatedQuantity = state.items.map(item =>
+          item._id === itemId ? { ...item, quantity } : item
+        );
+        newState = {
+          ...state,
+          items: itemsWithUpdatedQuantity,
+          total: calculateTotal(itemsWithUpdatedQuantity)
+        };
       }
-
-      const itemsWithUpdatedQuantity = state.items.map(item =>
-        item._id === itemId ? { ...item, quantity } : item
-      );
-      return {
-        ...state,
-        items: itemsWithUpdatedQuantity,
-        total: calculateTotal(itemsWithUpdatedQuantity)
-      };
+      break;
 
     case 'CLEAR_CART':
-      return initialState;
+      newState = {
+        items: [],
+        total: 0
+      };
+      break;
 
     default:
       return state;
   }
+
+  // Save to localStorage after every state change
+  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(newState));
+  return newState;
 };
 
 const calculateTotal = (items) => {
@@ -90,7 +116,22 @@ const calculateTotal = (items) => {
 };
 
 export const CartProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(cartReducer, initialState);
+  const [state, dispatch] = useReducer(cartReducer, null, loadInitialState);
+
+  // Optional: Sync cart across tabs/windows
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === CART_STORAGE_KEY) {
+        const newState = JSON.parse(e.newValue);
+        if (newState) {
+          dispatch({ type: 'SYNC_CART', payload: newState });
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const addToCart = (item) => {
     dispatch({ type: 'ADD_TO_CART', payload: item });

@@ -9,7 +9,7 @@ const generateToken = (id) => {
 
 const register = async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { username, password , usertype} = req.body;
 
         // Check if user already exists
         const userExists = await User.findOne({ username });
@@ -21,12 +21,14 @@ const register = async (req, res) => {
         const user = await User.create({
             username,
             password,
+            usertype
         });
 
         if (user) {
             res.status(201).json({
                 _id: user._id,
                 username: user.username,
+                usertype: user.usertype,
             });
         }
     } catch (error) {
@@ -47,6 +49,7 @@ const login = async (req, res) => {
                 _id: user._id,
                 username: user.username,
                 token: generateToken(user._id),
+                usertype : user.usertype
             });
         } else {
             res.status(401).json({ message: 'Invalid username or password' });

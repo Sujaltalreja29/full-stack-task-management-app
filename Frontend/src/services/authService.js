@@ -2,11 +2,12 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.API_URL || 'http://localhost:5000/api';
 
-export const register = async (username, password) => {
+export const register = async (username, password, usertype) => {
   try {
     const response = await axios.post(`${API_URL}/auth/register`, {
       username,
       password,
+      usertype,
     });
     return response.data;
   } catch (error) {

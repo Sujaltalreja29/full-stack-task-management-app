@@ -9,12 +9,14 @@ import Register from './components/Auth/Register';
 import Menu from './pages/Menu';
 import OrderPage from './pages/Order';
 import OrderHistory from './pages/History';
+import Navbar from './components/Navbar';
 function App() {
 
   return (
     <Router>
       <AuthProvider>
       <CartProvider>
+        <Navbar />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
