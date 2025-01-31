@@ -8,6 +8,10 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsAuth(true);
+    }
     // Check for JWT token on component mount and token changes
     const checkAuth = () => {
       const token = localStorage.getItem('token');
@@ -18,7 +22,7 @@ const Navbar = () => {
     // Listen for storage changes (in case token is modified in another tab)
     window.addEventListener('storage', checkAuth);
     return () => window.removeEventListener('storage', checkAuth);
-  }, []);
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -44,15 +48,16 @@ const Navbar = () => {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link 
+            
+            
+            {isAuth ? (
+              <>
+              <Link 
               to="/menu" 
               className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md"
             >
               Menu
             </Link>
-            
-            {isAuth ? (
-              <>
                 <Link 
                   to="/history" 
                   className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md flex items-center"

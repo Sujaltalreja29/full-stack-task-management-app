@@ -53,11 +53,19 @@ const createOrder = async (req, res, next) => {
 // @access  Private
 const getUserOrders = async (req, res, next) => {
     try {
+        if(!req.user.usertype) {
         const orders = await Order.find({ userId: req.user._id })
             .populate('items.menuItem')
             .sort('-createdAt');
 
         res.json(orders);
+        } else {
+            console.log("Admin user detected");
+            const orders = await Order.find()
+            .populate('items.menuItem')
+            .sort('-createdAt');
+            res.json(orders);
+        }
     } catch (error) {
         next(error);
     }

@@ -15,6 +15,7 @@ authAxios.interceptors.request.use((config) => {
 
 export const getAllOrders = async () => {
   const response = await authAxios.get(`${API_URL}/order/`);
+  console.log(response.data);
   return response.data;
 };
 

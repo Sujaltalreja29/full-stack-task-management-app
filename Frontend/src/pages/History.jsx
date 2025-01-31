@@ -13,6 +13,7 @@ const OrderHistory = () => {
     const fetchOrders = async () => {
       try {
         const response = await orderService.getAllOrders(user._id);
+        console.log(response)
         setOrders(response);
       } catch (err) {
         setError(err.message);
