@@ -23,3 +23,10 @@ export const createOrder = async (orderData) => {
   const response = await authAxios.post(`${API_URL}/order/`, orderData);
   return response.data;
 };
+
+export const orderStatus = async (orderid,status) => {
+  console.log(orderid);
+  const response = await authAxios.put(`${API_URL}/order/${orderid}/status`,status);
+  console.log(response.data);
+  return response.data;
+};

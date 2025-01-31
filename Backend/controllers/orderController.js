@@ -102,8 +102,7 @@ const getOrderById = async (req, res, next) => {
 const updateOrderStatus = async (req, res, next) => {
     try {
         const { status } = req.body;
-        
-        const validStatuses = ['Pending', 'Confirmed', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled'];
+        const validStatuses = ['Pending', 'Completed', 'Cancelled'];
         
         if (!validStatuses.includes(status)) {
             res.status(400);

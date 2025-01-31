@@ -8,12 +8,14 @@ const OrderHistory = () => {
   const [orders, setOrders] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
+  const [updating, setUpdating] = React.useState(false);
+
+  const ORDER_STATUSES = ['Pending', 'Completed', 'Cancelled'];
 
   React.useEffect(() => {
     const fetchOrders = async () => {
       try {
         const response = await orderService.getAllOrders(user._id);
-        console.log(response)
         setOrders(response);
       } catch (err) {
         setError(err.message);
@@ -27,9 +29,28 @@ const OrderHistory = () => {
     }
   }, [user]);
 
+  const handleStatusUpdate = async (orderId, newStatus) => {
+    setUpdating(true);
+    try {
+      await orderService.orderStatus(orderId, {status :newStatus});
+      console.log(orders);
+      setOrders(orders.map(order => 
+        order._id === orderId 
+          ? { ...order, status: newStatus }
+          : order
+      ));
+    } catch (err) {
+      setError('Failed to update order status');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   const getStatusColor = (status) => {
     const statusColors = {
-      Confirmed: 'bg-blue-200 text-blue-800',
+      Pending: 'bg-yellow-200 text-yellow-800',
+      Completed: 'bg-gray-200 text-gray-800',
+      Cancelled: 'bg-red-200 text-red-800',
     };
     return statusColors[status] || 'bg-gray-200 text-gray-800';
   };
@@ -61,9 +82,29 @@ const OrderHistory = () => {
           <div key={order._id} className="border rounded-lg shadow-sm p-6">
             <div className="flex justify-between items-center border-b pb-4 mb-4">
               <h2 className="text-lg font-semibold">Order #{order._id}</h2>
-              <span className={`px-3 py-1 rounded text-sm font-medium ${getStatusColor(order.status)}`}>
-                {order.status}
-              </span>
+              {user.usertype ? (
+                <div className="flex items-center gap-4">
+                  <span className={`px-3 py-1 rounded text-sm font-medium ${getStatusColor(order.status)}`}>
+                    Current: {order.status}
+                  </span>
+                  <select
+                    className="px-3 py-1 border rounded-md bg-white disabled:opacity-50"
+                    disabled={updating}
+                    value={order.status}
+                    onChange={(e) => handleStatusUpdate(order._id, e.target.value)}
+                  >
+                    {ORDER_STATUSES.map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <span className={`px-3 py-1 rounded text-sm font-medium ${getStatusColor(order.status)}`}>
+                  {order.status}
+                </span>
+              )}
             </div>
             <div className="space-y-4">
               <div className="border-b pb-4">
@@ -83,7 +124,9 @@ const OrderHistory = () => {
                 <span className="font-medium">Total Amount:</span>
                 <span className="text-lg font-bold">${order.totalAmount.toFixed(2)}</span>
               </div>
-              <div className="text-sm text-gray-500">Ordered at: {new Date(order.createdAt).toLocaleString()}</div>
+              <div className="text-sm text-gray-500">
+                Ordered at: {new Date(order.createdAt).toLocaleString()}
+              </div>
             </div>
           </div>
         ))
