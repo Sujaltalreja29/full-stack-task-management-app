@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // Create axios instance with auth header
 const authAxios = axios.create();
@@ -14,19 +14,19 @@ authAxios.interceptors.request.use((config) => {
 });
 
 export const getAllOrders = async () => {
-  const response = await authAxios.get(`${API_URL}/order/`);
+  const response = await authAxios.get(`${API_URL}/api/order/`);
   console.log(response.data);
   return response.data;
 };
 
 export const createOrder = async (orderData) => {
-  const response = await authAxios.post(`${API_URL}/order/`, orderData);
+  const response = await authAxios.post(`${API_URL}/api/order/`, orderData);
   return response.data;
 };
 
 export const orderStatus = async (orderid,status) => {
   console.log(orderid);
-  const response = await authAxios.put(`${API_URL}/order/${orderid}/status`,status);
+  const response = await authAxios.put(`${API_URL}/api/order/${orderid}/status`,status);
   console.log(response.data);
   return response.data;
 };

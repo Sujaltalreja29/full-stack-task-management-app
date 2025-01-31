@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.API_URL || 'http://localhost:5000/api';
-
+const API_URL = import.meta.env.VITE_API_URL;
+console.log(API_URL);
 export const register = async (username, password, usertype) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/register`, {
+    const response = await axios.post(`${API_URL}/api/auth/register`, {
       username,
       password,
       usertype,
@@ -17,7 +17,9 @@ export const register = async (username, password, usertype) => {
 
 export const login = async (username, password) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/login`, {
+    console.log("login");
+    console.log(API_URL);
+    const response = await axios.post(`${API_URL}/api/auth/login`, {
       username,
       password,
     });
