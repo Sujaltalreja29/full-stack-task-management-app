@@ -89,7 +89,7 @@ Ensure you have the following installed:
 
 ## Deployment
 - **Frontend Deployment:** Deployed on [Vercel](https://sujal-talreja-app.vercel.app/)
-- **Backend Deployment:** Deployed on [Heroku/Railway/Render](https://full-stack-task-management-app-backend-7uv2.onrender.com)
+- **Backend Deployment:** Deployed on [Render](https://full-stack-task-management-app-backend-7uv2.onrender.com)
 - **MongoDB:** Hosted on MongoDB Atlas
 
 ## Live Demo
