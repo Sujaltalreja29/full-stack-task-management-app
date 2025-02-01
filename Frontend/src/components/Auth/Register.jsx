@@ -1,7 +1,9 @@
-import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
-import { useAuth } from "../../context/AuthContext"
-import * as authService from "../../services/authService"
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import * as authService from "../../services/authService";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -9,54 +11,49 @@ const Register = () => {
     password: "",
     confirmPassword: "",
     isAdmin: false,
-  })
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
-  const { login } = useAuth()
+  });
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
+    const { name, value, type, checked } = e.target;
     setFormData((prevState) => ({
       ...prevState,
       [name]: type === "checkbox" ? checked : value,
-    }))
-  }
+    }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError("")
+    e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match")
-      return
+      toast.error("Passwords do not match");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     try {
-      const data = await authService.register(formData.username, formData.password, formData.isAdmin)
-      login(data, data.token)
-      navigate("/login")
+      const data = await authService.register(formData.username, formData.password, formData.isAdmin);
+      login(data, data.token);
+      toast.success("Account created successfully!");
+      navigate("/login");
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message || "Registration failed");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 to-purple-100 p-4 sm:p-6 lg:p-8">
+      <ToastContainer />
       <div className="w-full max-w-md bg-white rounded-lg shadow-md overflow-hidden">
         <div className="p-6 sm:p-8">
           <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">Create your account</h2>
           <p className="text-center text-sm text-gray-600 mb-8">Enter your details to register</p>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                <span className="block sm:inline">{error}</span>
-              </div>
-            )}
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
                 Username
@@ -160,8 +157,7 @@ const Register = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Register
-
+export default Register;

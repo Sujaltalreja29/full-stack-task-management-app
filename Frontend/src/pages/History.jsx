@@ -16,6 +16,7 @@ const OrderHistory = () => {
     const fetchOrders = async () => {
       try {
         const response = await orderService.getAllOrders(user._id);
+        console.log("Fetched Orders:", response);
         setOrders(response);
       } catch (err) {
         setError(err.message);
@@ -112,9 +113,9 @@ const OrderHistory = () => {
                 <ul className="space-y-2">
                   {order.items.map((item, index) => (
                     <li key={index} className="flex justify-between">
-                      <span>{item.menuItem.name}</span>
+                      <span>{item.menuItem?.name || "something deleted"}</span>
                       <span className="text-gray-600">
-                      ₹{item.menuItem.price.toFixed(2)} x {item.quantity}
+                      ₹{item.menuItem?.price.toFixed(2) || 0} x {item.quantity}
                       </span>
                     </li>
                   ))}
