@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, History, LogOut, LogIn, User } from 'lucide-react';
+import { Menu, X, History, LogOut, LogIn } from 'lucide-react';
 
 const Navbar = () => {
   const [isAuth, setIsAuth] = useState(false);
@@ -12,6 +12,7 @@ const Navbar = () => {
     if (token) {
       setIsAuth(true);
     }
+
     // Check for JWT token on component mount and token changes
     const checkAuth = () => {
       const token = localStorage.getItem('token');
@@ -22,10 +23,12 @@ const Navbar = () => {
     // Listen for storage changes (in case token is modified in another tab)
     window.addEventListener('storage', checkAuth);
     return () => window.removeEventListener('storage', checkAuth);
-  }, [navigate]);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('shopping-cart');
     setIsAuth(false);
     setIsMobileMenuOpen(false);
     navigate('/login');
@@ -48,18 +51,16 @@ const Navbar = () => {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-4">
-            
-            
-            {isAuth ? (
-              <>
-              <Link 
-              to="/menu" 
+            <Link
+              to="/menu"
               className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md"
             >
               Menu
             </Link>
-                <Link 
-                  to="/history" 
+            {isAuth ? (
+              <>
+                <Link
+                  to="/history"
                   className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md flex items-center"
                 >
                   <History className="w-4 h-4 mr-1" />
@@ -74,7 +75,7 @@ const Navbar = () => {
                 </button>
               </>
             ) : (
-              <Link 
+              <Link
                 to="/login"
                 className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center"
               >
@@ -90,11 +91,7 @@ const Navbar = () => {
               onClick={toggleMobileMenu}
               className="text-gray-600 hover:text-gray-900"
             >
-              {isMobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
@@ -111,7 +108,7 @@ const Navbar = () => {
             >
               Menu
             </Link>
-            
+
             {isAuth ? (
               <>
                 <Link
