@@ -73,7 +73,7 @@ const OrderPage = () => {
           <p className="text-gray-600 mb-4">
             Redirectiong to history ...
           </p>
-          {setTimeout(() => navigate('/history'), 3000)}
+          {setTimeout(() => navigate('/history'), 2000)}
         </div>
       </div>
     );
@@ -109,7 +109,7 @@ const OrderPage = () => {
                 <div key={item._id} className="flex items-center justify-between py-4 border-b">
                   <div className="flex-1">
                     <h3 className="font-semibold">{item.name}</h3>
-                    <p className="text-gray-600">${item.price.toFixed(2)} each</p>
+                    <p className="text-gray-600">₹{item.price.toFixed(2)} each</p>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
@@ -140,15 +140,15 @@ const OrderPage = () => {
               <div className="mt-4 space-y-2">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>
-                  <span>${calculateSubtotal().toFixed(2)}</span>
+                  <span>₹{calculateSubtotal().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Tax (10%)</span>
-                  <span>${calculateTax().toFixed(2)}</span>
+                  <span>₹{calculateTax().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-lg pt-2 border-t">
                   <span>Total</span>
-                  <span>${calculateTotal().toFixed(2)}</span>
+                  <span>₹{calculateTotal().toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -226,7 +226,7 @@ const OrderPage = () => {
                   ) : (
                     <>
                       <CreditCardIcon className="w-5 h-5" />
-                      Place Order (${calculateTotal().toFixed(2)})
+                      Place Order (₹{calculateTotal().toFixed(2)})
                     </>
                   )}
                 </button>

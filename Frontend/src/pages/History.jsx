@@ -114,7 +114,7 @@ const OrderHistory = () => {
                     <li key={index} className="flex justify-between">
                       <span>{item.menuItem.name}</span>
                       <span className="text-gray-600">
-                        ${item.menuItem.price.toFixed(2)} x {item.quantity}
+                      ₹{item.menuItem.price.toFixed(2)} x {item.quantity}
                       </span>
                     </li>
                   ))}
@@ -122,7 +122,7 @@ const OrderHistory = () => {
               </div>
               <div className="flex justify-between items-center pt-2">
                 <span className="font-medium">Total Amount:</span>
-                <span className="text-lg font-bold">${order.totalAmount.toFixed(2)}</span>
+                <span className="text-lg font-bold">₹{order.totalAmount.toFixed(2)}</span>
               </div>
               <div className="text-sm text-gray-500">
                 Ordered at: {new Date(order.createdAt).toLocaleString()}

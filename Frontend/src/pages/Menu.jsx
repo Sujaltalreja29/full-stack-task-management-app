@@ -269,7 +269,7 @@ const Menu = () => {
           <div>
             <h3 className="text-xl font-semibold">{item.name}</h3>
             <p className="text-gray-600">{item.category}</p>
-            <p className="text-lg font-bold mt-2">${item.price.toFixed(2)}</p>
+            <p className="text-lg font-bold mt-2">₹{item.price.toFixed(2)}</p>
             <span className={`inline-block px-2 py-1 rounded text-sm ${
               item.availability ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
             }`}>
@@ -432,7 +432,7 @@ const Menu = () => {
                       <div>
                         <h3 className="font-semibold">{item.name}</h3>
                         <p className="text-sm text-gray-600">
-                          ${item.price.toFixed(2)} × {item.quantity}
+                        ₹{item.price.toFixed(2)} × {item.quantity}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -456,7 +456,7 @@ const Menu = () => {
                 <div className="border-t pt-4">
                   <div className="flex justify-between items-center mb-4">
                     <span className="font-bold">Total:</span>
-                    <span className="font-bold">${getCartTotal().toFixed(2)}</span>
+                    <span className="font-bold">₹{getCartTotal().toFixed(2)}</span>
                   </div>
                   <button
                     onClick={() => {
