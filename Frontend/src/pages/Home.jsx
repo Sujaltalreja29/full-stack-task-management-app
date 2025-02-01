@@ -15,7 +15,7 @@ export default function Home() {
             Order from your favorite restaurants and enjoy meals from the comfort of your home.
           </p>
           <Link
-            href="/login"
+            to="/login"
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
           >
             Login to Start Ordering
