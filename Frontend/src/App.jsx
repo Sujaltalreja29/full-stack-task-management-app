@@ -6,7 +6,7 @@ import { CartProvider } from './context/CartContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
-import Menu from './pages/menu';
+import Menu from './pages/Menu';
 import OrderPage from './pages/Order';
 import OrderHistory from './pages/History';
 import Navbar from './components/Navbar';
