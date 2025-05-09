@@ -41,6 +41,25 @@ export default function Login() {
     }
   };
 
+  const handleTestLogin = async (role) => {
+    setLoading(true);
+    try {
+      // Simulate login with test credentials based on role
+      const credentials = role === 'admin' 
+        ? { username: 'testadmin', password: '123456' } 
+        : { username: 'test', password: '123456' };
+      
+      const data = await authService.login(credentials.username, credentials.password);
+      login(data, data.token);
+      toast.success(`Login successful as ${role}!`);
+      navigate("/menu");
+    } catch (err) {
+      toast.error(err.message || "Test login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 p-4 sm:p-6 lg:p-8">
       <ToastContainer
@@ -178,11 +197,34 @@ export default function Login() {
                 </button>
               </motion.div>
             </form>
-            
+
+            {/* Test Login Buttons */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
+              className="mt-5 grid grid-cols-2 gap-3"
+            >
+              <button
+                onClick={() => handleTestLogin('user')}
+                disabled={loading}
+                className="flex justify-center items-center py-2 px-3 rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 transition duration-200 text-sm font-medium"
+              >
+                Login as User
+              </button>
+              <button
+                onClick={() => handleTestLogin('admin')}
+                disabled={loading}
+                className="flex justify-center items-center py-2 px-3 rounded-lg text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 transition duration-200 text-sm font-medium"
+              >
+                Login as Admin
+              </button>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7 }}
             >
               <p className="mt-8 text-center text-gray-600">
                 Don't have an account?{" "}
